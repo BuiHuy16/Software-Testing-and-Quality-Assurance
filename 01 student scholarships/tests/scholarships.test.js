@@ -3,6 +3,7 @@ const studentScholarShips = require('../src/scholarships');
 
 describe('Student Scholarships', () => {
     test.each([
+        //TC     gpa   drl    expected
         ['TC01', 3.60, 90, 'Scholarships1'],
         ['TC02', 3.59, 90, 'Scholarships2'],
         ['TC03', 3.61, 90, 'Scholarships1'],
