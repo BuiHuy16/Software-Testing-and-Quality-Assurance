@@ -1,7 +1,8 @@
 // import hàm trong file delivery_fee_charged.js
 const deliveryFeeCharged = require('../src/delivery_fee_charged');
 
-describe('Delivery Fee Charged', () => {
+// 1 Áp dụng phân tích biên (BVA)
+describe('Delivery Fee Charged - BVA', () => {
     test.each([
         // =====================================================
         // Nhóm 1: BVA tại điều kiện miễn phí vận chuyển
@@ -127,4 +128,113 @@ describe('Delivery Fee Charged', () => {
         }
     );
 
+});
+
+// 2 Áp dụng phân hoạch tương đương (ECT)
+describe('Delivery Fee Charged - ECT', () => {
+    test.each([
+        // TC, Phân hoạch (V-W-D), value, weight, distance, Expected
+
+        // TC01: V1-W1-D1
+        // Giá trị cao, khối lượng và khoảng cách thấp
+        // Thỏa điều kiện miễn phí vận chuyển
+        ['TC01', 'V1-W1-D1', 1000000, 3.0, 5, 'Free shipping'],
+
+        // TC02: V2-W2-D2
+        // Giá trị thấp hơn ngưỡng miễn phí
+        // Khối lượng và khoảng cách thuộc mức phí loại 1
+        ['TC02', 'V2-W2-D2', 200000, 8.0, 20, 'Shipping fee type 1'],
+
+        // TC03: V1-W3-D3
+        // Khối lượng và khoảng cách thuộc mức phí loại 2
+        ['TC03', 'V1-W3-D3', 1000000, 15.0, 45, 'Shipping fee type 2'],
+
+        // TC04: V2-W4-D4
+        // Khối lượng và khoảng cách thuộc mức phí loại 3
+        ['TC04', 'V2-W4-D4', 200000, 25.0, 80, 'Shipping fee type 3'],
+
+        // TC05: V1-W5-D1
+        // Weight thuộc lớp không hợp lệ: weight < 0.1
+        ['TC05', 'V1-W5-D1', 1000000, 0.0, 5, 'Invalid'],
+
+        // TC06: V1-W6-D1
+        // Weight thuộc lớp không hợp lệ: weight > 30
+        ['TC06', 'V1-W6-D1', 1000000, 35.0, 5, 'Invalid'],
+
+        // TC07: V1-W1-D5
+        // Distance thuộc lớp không hợp lệ: distance < 1
+        ['TC07', 'V1-W1-D5', 1000000, 3.0, 0, 'Invalid'],
+
+        // TC08: V1-W1-D6
+        // Distance thuộc lớp không hợp lệ: distance > 100
+        ['TC08', 'V1-W1-D6', 1000000, 3.0, 120, 'Invalid'],
+
+        // TC09: V3-W1-D1
+        // Value thuộc lớp không hợp lệ: value < 50000
+        ['TC09', 'V3-W1-D1', 40000, 3.0, 5, 'Invalid'],
+
+        // TC10: V4-W1-D1
+        // Value thuộc lớp không hợp lệ: value > 20000000
+        ['TC10', 'V4-W1-D1', 25000000, 3.0, 5, 'Invalid'],
+
+    ])(
+        '%s - Partition=%s, value=%i, weight=%f, distance=%i',
+        (testCase, partition, value, weight, distance, expected) => {
+            // Chỉ value, weight và distance là input của hàm.
+            // partition chỉ dùng để mô tả lớp tương đương.
+            expect(
+                deliveryFeeCharged(weight, distance, value)
+            ).toBe(expected);
+        }
+    );
+});
+
+// 3 Áp dụng kiểm thử dựa trên bảng quyết định (DTT)
+describe('Delivery Fee Charged - DTT', () => {
+    test.each([
+        // TC, Rule, weight, distance, value, Expected
+
+        // R1: Weight không hợp lệ (weight > 30)
+        ['TC01', 'R1', 35.0, 20, 600000, 'Invalid'],
+
+        // R2: Weight hợp lệ nhưng distance không hợp lệ (distance > 100)
+        ['TC02', 'R2', 4.0, 120, 600000, 'Invalid'],
+
+        // R3: Weight và distance hợp lệ nhưng value < 50000
+        ['TC03', 'R3', 4.0, 20, 30000, 'Invalid'],
+
+        // R4: Weight thuộc (20, 30]
+        ['TC04', 'R4', 25.0, 20, 600000, 'Shipping fee type 3'],
+
+        // R5: Weight <= 20 nhưng distance thuộc (60, 100]
+        ['TC05', 'R5', 15.0, 80, 600000, 'Shipping fee type 3'],
+
+        // R6: Weight thuộc (10, 20] và distance <= 60
+        ['TC06', 'R6', 15.0, 20, 600000, 'Shipping fee type 2'],
+
+        // R7: Weight <= 10 nhưng distance thuộc (30, 60]
+        ['TC07', 'R7', 8.0, 45, 600000, 'Shipping fee type 2'],
+
+        // R8: Weight thuộc (5, 10] và distance <= 30
+        ['TC08', 'R8', 8.0, 8, 600000, 'Shipping fee type 1'],
+
+        // R9: Weight <= 5 nhưng distance thuộc (10, 30]
+        ['TC09', 'R9', 3.0, 20, 600000, 'Shipping fee type 1'],
+
+        // R10: Weight <= 5, distance <= 10 nhưng value < 500000
+        ['TC10', 'R10', 3.0, 8, 200000, 'Shipping fee type 1'],
+
+        // R11: Weight <= 5, distance <= 10 và value >= 500000
+        ['TC11', 'R11', 3.0, 8, 600000, 'Free shipping'],
+
+    ])(
+        '%s - Rule %s, weight=%f, distance=%i, value=%i',
+        (testCase, rule, weight, distance, value, expected) => {
+            // Rule chỉ dùng để mô tả quy tắc trong bảng quyết định.
+            // Hàm thực tế chỉ nhận weight, distance và value.
+            expect(
+                deliveryFeeCharged(weight, distance, value)
+            ).toBe(expected);
+        }
+    );
 });

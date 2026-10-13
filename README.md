@@ -76,13 +76,13 @@ npm -v
 Clone repository:
 
 ```bash
-git clone https://github.com/BuiHuy16/INT3317-Software-Testing-and-Quality-Assurance.git
+git clone https://github.com/BuiHuy16/Software-Testing-and-Quality-Assurance.git
 ```
 
 Di chuyển vào thư mục project:
 
 ```bash
-cd INT3317-Software-Testing-and-Quality-Assurance
+cd Software-Testing-and-Quality-Assurance
 ```
 
 Cài đặt các package cần thiết:
@@ -117,10 +117,22 @@ Chạy test của bài toán học bổng:
 npx jest "01 student scholarships"
 ```
 
+Chạy test riêng với từng mỗi phương pháp (BVA, ECT, DTT):
+
+```bash
+npx jest "01 student scholarships" --testNamePattern="BVA|ECT|DTT"
+```
+
 Chạy test của bài toán giao hàng:
 
 ```bash
 npx jest "02 delivery_fee_charged"
+```
+
+Chạy test riêng với từng mỗi phương pháp (BVA, ECT, DTT):
+
+```bash
+npx jest "02 delivery_fee_charged" --testNamePattern="BVA|ECT|DTT"
 ```
 
 Chạy test với thông tin chi tiết:

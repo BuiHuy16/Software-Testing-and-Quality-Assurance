@@ -1,7 +1,8 @@
 // import hàm trong file scholarships.js
 const studentScholarShips = require('../src/scholarships');
 
-describe('Student Scholarships', () => {
+// 1 Áp dụng phân tích biên (BVA)
+describe('Student Scholarships - BVA', () => {
     test.each([
         //TC     gpa   drl    expected
 
@@ -67,6 +68,99 @@ describe('Student Scholarships', () => {
     ])(
         '%s: GPA=%f, DRL=%i',
         (testCase, gpa, drl, expected) => {
+            expect(studentScholarShips(gpa, drl)).toBe(expected);
+        }
+    );
+});
+
+
+// 2 Áp dụng phân hoạch tương đương (ECT)
+describe('Student Scholarships - ECT', () => {
+    test.each([
+        // TC, GPA class, DRL class, GPA, DRL, Expected
+
+        // G1: GPA thuộc [3.60, 4.00]
+        // D1: DRL thuộc [90, 100]
+        ['TC01', 'G1', 'D1', 3.8, 95, 'Scholarships1'],
+
+        // GPA thuộc G1, DRL thuộc D2 [80, 90)
+        ['TC02', 'G1', 'D2', 3.8, 85, 'Scholarships2'],
+
+        // GPA thuộc G1, DRL thuộc D3 [0, 80)
+        ['TC03', 'G1', 'D3', 3.8, 75, 'No scholarships'],
+
+        // G2: GPA thuộc [3.20, 3.60)
+        // GPA thuộc G2, DRL thuộc D1
+        ['TC04', 'G2', 'D1', 3.4, 95, 'Scholarships2'],
+
+        // GPA thuộc G2, DRL thuộc D2
+        ['TC05', 'G2', 'D2', 3.4, 85, 'Scholarships2'],
+
+        // GPA thuộc G2, DRL thuộc D3
+        ['TC06', 'G2', 'D3', 3.4, 75, 'No scholarships'],
+
+        // G3: GPA thuộc [0, 3.20)
+        // GPA thuộc G3, DRL thuộc D1
+        ['TC07', 'G3', 'D1', 2.5, 95, 'No scholarships'],
+
+        // GPA thuộc G3, DRL thuộc D2
+        ['TC08', 'G3', 'D2', 2.5, 85, 'No scholarships'],
+
+        // GPA thuộc G3, DRL thuộc D3
+        ['TC09', 'G3', 'D3', 2.5, 75, 'No scholarships'],
+
+        // G4: GPA < 0, đầu vào không hợp lệ
+        ['TC10', 'G4', 'D1', -0.5, 95, 'Invalid'],
+
+        // G5: GPA > 4.00, đầu vào không hợp lệ
+        ['TC11', 'G5', 'D1', 4.5, 95, 'Invalid'],
+
+        // D4: DRL < 0, đầu vào không hợp lệ
+        ['TC12', 'G1', 'D4', 3.8, -5, 'Invalid'],
+
+        // D5: DRL > 100, đầu vào không hợp lệ
+        ['TC13', 'G1', 'D5', 3.8, 110, 'Invalid'],
+    ])(
+        '%s - GPA class=%s, DRL class=%s, GPA=%f, DRL=%f',
+        (testCase, gpaClass, drlClass, gpa, drl, expected) => {
+            // Chỉ GPA và DRL là input của hàm cần kiểm thử.
+            // gpaClass và drlClass chỉ dùng để mô tả test case.
+            expect(studentScholarShips(gpa, drl)).toBe(expected);
+        }
+    );
+});
+
+// 3 Áp dụng kiểm thử dựa trên bảng quyết định (DTT)
+describe('Student Scholarships - DTT', () => {
+    test.each([
+        // TC, Rule, GPA,  DRL, Expected
+
+        // R1: GPA nằm ngoài miền hợp lệ [0, 4]
+        ['TC01', 'R1', -1.00, 85,  'Invalid'],
+
+        // R2: GPA hợp lệ nhưng DRL nằm ngoài miền [0, 100]
+        ['TC02', 'R2',  3.40, 105, 'Invalid'],
+
+        // R3: GPA < 3.20 nên không đủ điều kiện nhận học bổng
+        ['TC03', 'R3',  2.50, 85,  'No scholarships'],
+
+        // R4: GPA >= 3.20 nhưng DRL < 80
+        ['TC04', 'R4',  3.50, 70,  'No scholarships'],
+
+        // R5: GPA thuộc [3.20, 3.60) và DRL >= 80
+        ['TC05', 'R5',  3.40, 85,  'Scholarships2'],
+
+        // R6: GPA >= 3.60 và DRL thuộc [80, 90)
+        ['TC06', 'R6',  3.80, 85,  'Scholarships2'],
+
+        // R7: GPA >= 3.60 và DRL >= 90
+        ['TC07', 'R7',  3.80, 95,  'Scholarships1'],
+
+    ])(
+        '%s - Rule %s, GPA=%f, DRL=%i',
+        (testCase, rule, gpa, drl, expected) => {
+            // Rule chỉ dùng để mô tả test case.
+            // Hàm cần kiểm thử chỉ nhận GPA và DRL.
             expect(studentScholarShips(gpa, drl)).toBe(expected);
         }
     );
