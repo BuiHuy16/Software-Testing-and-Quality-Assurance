@@ -2,6 +2,11 @@
 
 Bài tập thực hành môn **Kiểm thử và Đảm bảo chất lượng phần mềm**, sử dụng **JavaScript** và **Jest**
 
+Link docs:
+1. [Phân tích biên (BVA)](docs/01-bva.md)
+2. [Phân hoạch tương đương (ECT)](docs/02-ect.md)
+3. [Bảng quyết định (DTT)](docs/03-dtt.md)
+
 ## Mục lục
 
 1. [Bài toán học bổng (student scholarships)](#1-bài-toán-học-bổng-student-scholarships)
